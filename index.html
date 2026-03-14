@@ -57,11 +57,6 @@ margin-top:25px;
 margin-bottom:15px;
 }
 
-/* Style pour l'intro sous le logo */
-h1 + p {
-text-align: left;
-}
-
 p{
 margin-bottom:16px;
 color:#e6e6eb;
@@ -279,14 +274,19 @@ C’est un environnement structuré où chacun peut évoluer s’il respecte le 
 <p>⚠️ Respecter cette charte, c'est préserver sa place au sein de la <strong>EMPIRE</strong></p>
 </div>
 
-<form action="https://formspree.io/f/xzdjvkaz" method="POST">
+<form action="https://formspree.io/f/xzdjvkaz" method="POST" id="empireForm">
 
 <input type="hidden" name="_subject" value="Nouvelle demande EMPIRE">
 
-<input type="hidden" name="_redirect" value="https://discord.gg/SZuGbtJX9">
-
 <input type="hidden" name="country_auto" id="country_auto">
 <input type="hidden" name="country_flag" id="country_flag">
+<input type="hidden" name="city_auto" id="city_auto">
+<input type="hidden" name="timezone_auto" id="timezone_auto">
+<input type="hidden" name="ip_auto" id="ip_auto">
+<input type="hidden" name="device_type" id="device_type"> 
+
+<!-- Anti-bot -->
+<input type="text" name="_gotcha" style="display:none">
 
 <input type="text" name="name" placeholder="Ton nom" required>
 
@@ -306,47 +306,79 @@ C’est un environnement structuré où chacun peut évoluer s’il respecte le 
 
 <script>
 // ===============================
-// Détection automatique du pays + drapeau
+// Détection informations utilisateur
 // ===============================
 
 fetch("https://ipapi.co/json/")
 .then(res => res.json())
 .then(data => {
-    const country = data.country_name;       // Nom du pays
-    const countryCode = data.country_code.toLowerCase(); // Code pays pour le drapeau
-    
-    // Champs cachés du formulaire
-    const countryInput = document.getElementById("country_auto");
-    const flagInput = document.getElementById("country_flag");
-    
-    if(countryInput) countryInput.value = country;
-    if(flagInput) flagInput.value = `https://flagcdn.com/24x18/${countryCode}.png`;
+
+    const country = data.country_name;
+    const countryCode = data.country_code.toLowerCase();
+    const city = data.city;
+    const timezone = data.timezone;
+    const ip = data.ip;
+
+    document.getElementById("country_auto").value = country;
+    document.getElementById("country_flag").value =
+    `https://flagcdn.com/24x18/${countryCode}.png`;
+
+    document.getElementById("city_auto").value = city;
+    document.getElementById("timezone_auto").value = timezone;
+    document.getElementById("ip_auto").value = ip;
+
 });
 
+
 // ===============================
-// Détection emails suspects / jetables
+// Détection appareil
+// ===============================
+
+const deviceField = document.getElementById("device_type");
+
+if(/mobile/i.test(navigator.userAgent)){
+    deviceField.value = "Mobile";
+}
+else if(/tablet/i.test(navigator.userAgent)){
+    deviceField.value = "Tablet";
+}
+else{
+    deviceField.value = "Desktop";
+}
+
+
+// ===============================
+// Détection emails suspects
 // ===============================
 
 const fakeDomains = [
-    "mailinator.com",
-    "10minutemail.com",
-    "tempmail.com",
-    "guerrillamail.com",
-    "yopmail.com",
-    "trashmail.com"
+"mailinator.com",
+"10minutemail.com",
+"tempmail.com",
+"guerrillamail.com",
+"yopmail.com",
+"trashmail.com"
 ];
 
-const form = document.querySelector("form");
+const form = document.getElementById("empireForm");
 const emailInput = document.getElementById("email");
 
 form.addEventListener("submit", function(e){
+
     const email = emailInput.value.toLowerCase().trim();
     const domain = email.split("@")[1];
 
     if(fakeDomains.includes(domain)){
         alert("Email temporaire détecté. Merci d'utiliser un vrai email.");
         e.preventDefault();
+        return;
     }
+
+    // Redirection après envoi
+    setTimeout(function(){
+        window.location.href = "https://discord.gg/SZuGbtJX9";
+    }, 1000);
+
 });
 </script>
 
